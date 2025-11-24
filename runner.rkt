@@ -1,5 +1,10 @@
 #lang racket
 
+(define args (current-command-line-arguments))
+(when (= (vector-length args) 0)
+  (displayln "Please give the runner a file name")
+  (exit 255))
+
 (require "lexer.rkt")
 (require "parser.rkt")
 (require "passes.rkt")
@@ -20,7 +25,7 @@
             (displayln "")
             (passify pass-res (cdr current-passes)))))))
 
-(let [(lexer-res (lex "cond"))]
+(let [(lexer-res (lex (vector-ref args 0)))]
   (displayln "Lexical Analysis: ")
   (pretty-print lexer-res)
   (displayln "")
