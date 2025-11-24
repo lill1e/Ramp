@@ -18,7 +18,8 @@
     (match stmts
       [(cons (cons cnd body) other-stmts) (IfStmt cnd body (coalesced->if other-stmts))]
       [(list (cons cnd body)) (IfStmt cnd body (Void))]
-      [(list body) body])))
+      [(list body) body]
+      [_ null])))
 
 (define coalesce-cond
   (λ (expr)
@@ -31,8 +32,10 @@
        (match (Begin (map coalesce-cond stmts) (coalesce-cond final))
          [(Begin stmts final)
           (let*-values [((all-stmts) (append stmts (list final)))
-                        ((branches post-stmts) (coalesce-stmts all-stmts))]
-            (cond [(null? post-stmts) (coalesced->if branches)]
+                        ((branches post-stmts) (coalesce-stmts all-stmts))
+                        ((new-branches) (coalesced->if branches))]
+            (cond [(null? new-branches) (Begin stmts final)]
+                  [(null? post-stmts) (coalesced->if branches)]
                   [else (Begin (append (list (coalesced->if branches)) (drop-right post-stmts 1)) (take-right post-stmts 1))]))])]
       [(Let sym rhs body) (Let sym (coalesce-cond rhs) (coalesce-cond body))]
       [(SetBang sym rhs) (SetBang sym (coalesce-cond rhs))]
