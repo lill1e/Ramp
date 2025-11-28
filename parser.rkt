@@ -137,15 +137,14 @@
       (match/values
        (parse-identifier tokens)
        [(identifier post-tokens)
-        (begin
-          (let [(post-tokens (consume-symbol post-tokens '=))]
+        (let [(post-tokens (consume-symbol post-tokens '=))]
+          (match/values
+           (parse-stmt post-tokens)
+           [(rhs post-rhs-tokens)
             (match/values
-             (parse-stmt post-tokens)
-             [(rhs post-rhs-tokens)
-              (match/values
-               (parse-body-tk post-rhs-tokens null)
-               [(body post-body-tokens)
-                (values (Let identifier rhs body) post-body-tokens)])])))]))))
+             (parse-body-tk post-rhs-tokens null)
+             [(body post-body-tokens)
+              (values (Let identifier rhs body) post-body-tokens)])]))]))))
 
 (define parse-top
   (λ (tokens)
