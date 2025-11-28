@@ -13,4 +13,7 @@
                                        [(rhs post-tokens) (make-binary post-tokens (Binary (car tokens) lhs rhs) next syms)])]
       [_ (values lhs tokens)])))
 
-(provide make-binary)
+(define list-if-needed
+  (λ (v) (if (list? v) v (list v))))
+
+(provide make-binary list-if-needed)

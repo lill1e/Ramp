@@ -1,6 +1,7 @@
 #lang racket
 
 (require "structs.rkt")
+(require "utilities.rkt")
 
 (define ops
   (list
@@ -8,6 +9,12 @@
    '-
    '*
    '=
+   '>
+   '<
+   '>=
+   '<=
+   '==
+   '!=
    '!
    '|(|
    '|)|
@@ -26,9 +33,14 @@
   (λ (c)
     (not (member c char-ops))))
 
+(define chars?
+  (λ (loc)
+    (= (length (filter char? loc)) (length loc))))
+
 (define chars-op?
   (λ (op)
-    (if (null? op) #f (op? (string->symbol (list->string op))))))
+    (if (null? op) #f
+        (if (chars? op) (memv (string->symbol (list->string op)) ops) #f))))
 
 (define value->lexeme
   (λ (s)
@@ -71,7 +83,7 @@
 
 (define extend-acc
   (λ (acc item)
-    (append acc (if (null? item) null (list (acc->sym item))))))
+    (append (list-if-needed acc) (if (null? item) null (list (acc->sym item))))))
 
 (define file->symbols
   (λ (p acc alt-acc)
@@ -85,7 +97,7 @@
         [((? char-numeric?) _) (file->symbols p (extend-acc acc alt-acc) (char->number r))]
         [((? word-char?) (? word?)) (file->symbols p acc (append alt-acc (list r)))]
         [((? word-char?) _) (file->symbols p (extend-acc acc alt-acc) (list r))]
-        [((? char?) _) #:when (chars-op? (append alt-acc (list r))) (file->symbols p acc (append alt-acc (list r)))]
+        [((? char?) _) #:when (chars-op? (append (list-if-needed alt-acc) (list r))) (file->symbols p acc (append alt-acc (list r)))]
         [((? char?) (? op?)) (file->symbols p acc (append alt-acc (list r)))]
         [((? char?) _) (file->symbols p (extend-acc acc alt-acc) (list r))]))))
 

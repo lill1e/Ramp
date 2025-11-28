@@ -40,9 +40,23 @@
      (parse-mult tokens)
      [(lhs lhs-tokens) (make-binary lhs-tokens lhs parse-mult '(+ -))])))
 
+(define parse-cmp
+  (λ (tokens)
+    (match/values
+     (parse-bin tokens)
+     [(lhs lhs-tokens)
+      (make-binary lhs-tokens lhs parse-bin '(> >= < <=))])))
+
+(define parse-eq
+  (λ (tokens)
+    (match/values
+     (parse-cmp tokens)
+     [(lhs lhs-tokens)
+      (make-binary lhs-tokens lhs parse-cmp '(== !=))])))
+
 (define parse-expr
   (λ (tokens)
-    (parse-bin tokens)))
+    (parse-eq tokens)))
 
 (define consume
   (λ (tokens t)
