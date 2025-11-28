@@ -1,6 +1,7 @@
 #lang racket
 
 (require "structs.rkt")
+(require "utilities.rkt")
 
 (define parse-literal
   (λ (tokens)
@@ -31,14 +32,7 @@
   (λ (tokens)
     (match/values
      (parse-unary tokens)
-     [(lhs lhs-tokens)
-      (match lhs-tokens
-        [(? null?) (error "reached end of tokens without a match")]
-        [`(,(Symbol '*) . ,other-tokens)
-         (match/values
-          (parse-unary other-tokens)
-          [(rhs post-tokens) (values (Binary (car lhs-tokens) lhs rhs) post-tokens)])]
-        [_ (values lhs lhs-tokens)])])))
+     [(lhs lhs-tokens) (make-binary lhs-tokens lhs parse-unary '(*))])))
 
 (define parse-expr
   (λ (tokens)
