@@ -34,9 +34,15 @@
      (parse-unary tokens)
      [(lhs lhs-tokens) (make-binary lhs-tokens lhs parse-unary '(*))])))
 
+(define parse-bin
+  (λ (tokens)
+    (match/values
+     (parse-mult tokens)
+     [(lhs lhs-tokens) (make-binary lhs-tokens lhs parse-mult '(+ -))])))
+
 (define parse-expr
   (λ (tokens)
-    (parse-mult tokens)))
+    (parse-bin tokens)))
 
 (define consume
   (λ (tokens t)
