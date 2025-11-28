@@ -26,6 +26,10 @@
   (λ (c)
     (not (member c char-ops))))
 
+(define chars-op?
+  (λ (op)
+    (if (null? op) #f (op? (string->symbol (list->string op))))))
+
 (define value->lexeme
   (λ (s)
     (match s
@@ -81,6 +85,7 @@
         [((? char-numeric?) _) (file->symbols p (extend-acc acc alt-acc) (char->number r))]
         [((? word-char?) (? word?)) (file->symbols p acc (append alt-acc (list r)))]
         [((? word-char?) _) (file->symbols p (extend-acc acc alt-acc) (list r))]
+        [((? char?) _) #:when (chars-op? (append alt-acc (list r))) (file->symbols p acc (append alt-acc (list r)))]
         [((? char?) (? op?)) (file->symbols p acc (append alt-acc (list r)))]
         [((? char?) _) (file->symbols p (extend-acc acc alt-acc) (list r))]))))
 
