@@ -100,10 +100,18 @@
         [_ (values (Identifier ident) expr-tokens)])]
      [(expr-node expr-tokens) (values expr-node expr-tokens)])))
 
+(define list->begin
+  (λ (exprs)
+    (match exprs
+      [(? null?) (Void)]
+      [(list expr) expr]
+      [_ (Begin (drop-right exprs 1) (car (take-right exprs 1)))])
+    ))
+
 (define parse-block
   (λ (tokens exprs)
     (match tokens
-      [`(,(Symbol '|}|) . ,curr-toks) (values exprs curr-toks)]
+      [`(,(Symbol '|}|) . ,curr-toks) (values (list->begin exprs) curr-toks)]
       [`(,(Keyword 'Let) . ,_) (parse-binding tokens)]
       [_ (match/values
           (parse-top tokens)
