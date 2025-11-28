@@ -154,10 +154,23 @@
              [(body post-body-tokens)
               (values (Let identifier rhs body) post-body-tokens)])]))]))))
 
+(define parse-while
+  (λ (tokens)
+    (let* [(tokens (consume-keyword tokens 'While))
+           (tokens (consume-symbol tokens '|(|))]
+      (match/values
+       (parse-expr tokens)
+       [(cond-expr cond-tokens)
+        (let [(rparen-tokens (consume-symbol cond-tokens '|)|))]
+          (match/values
+           (parse-stmt rparen-tokens)
+           [(stmt stmt-tokens) (values (WhileLoop cond-expr stmt) stmt-tokens)]))]))))
+
 (define parse-top
   (λ (tokens)
     (match tokens
       [`(,(Keyword 'Let) . ,_) (parse-binding tokens)]
+      [`(,(Keyword 'While) . ,_) (parse-while tokens)]
       [_ (parse-stmt tokens)])))
 
 (define parse-body-tk

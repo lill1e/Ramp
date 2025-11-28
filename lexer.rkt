@@ -53,6 +53,7 @@
          (match v
            [(or 'true 'false) (Boolean (eqv? v 'true))]
            ['let (Keyword 'Let)]
+           ['while (Keyword 'While)]
            ['if (Keyword 'If)]
            ['else (Keyword 'Else)]
            [_ (Identifier v)])]
