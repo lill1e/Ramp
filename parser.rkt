@@ -129,9 +129,7 @@
           [(cnd expr-tokens)
            (let [(rp-tokens (consume-symbol expr-tokens '|)|))]
              (match/values
-              (parse-stmt rp-tokens) [(stmt stmt-tokens) (values (If cnd stmt) stmt-tokens)]))])
-         )
-       ]
+              (parse-stmt rp-tokens) [(stmt stmt-tokens) (values (If cnd stmt) stmt-tokens)]))]))]
       [`(,(Keyword 'Else) . ,after-tokens)
        (match/values
         (parse-stmt after-tokens)
