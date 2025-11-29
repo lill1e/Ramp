@@ -9,13 +9,30 @@
       [(? null?) (error "reached end of tokens without a match")]
       [`(,token . ,other-tokens) #:when (Number? token) (values token other-tokens)]
       [`(,token . ,other-tokens) #:when (Boolean? token) (values token other-tokens)]
+      [`(,(Identifier ident) ,(Symbol '|[|) . ,other-tokens)
+       (match/values
+        (parse-comma-vals other-tokens null)
+        [(exprs post-tokens) (values (Indexing (Identifier ident) (car exprs)) post-tokens)])]
       [`(,token . ,other-tokens) #:when (Identifier? token) (values token other-tokens)]
       [`(,(Symbol '|(|) . ,other-tokens)
        (match/values
         (parse-expr other-tokens)
         [(expr post-tokens)
          (let [(rparen-tokens (consume-symbol post-tokens '|)|))]
-           (values expr rparen-tokens))])])))
+           (values expr rparen-tokens))])]
+      [`(,(Symbol '|[|) . ,other-tokens)
+       (match/values
+        (parse-comma-vals other-tokens null)
+        [(exprs post-tokens) (values (Vector exprs) post-tokens)])])))
+
+(define parse-comma-vals
+  (λ (tokens acc)
+    (match tokens
+      [`(,(Symbol '|,|) . ,other-tokens) (parse-comma-vals other-tokens acc)]
+      [`(,(or (Symbol '|]|) (Symbol '|)|)) . ,other-tokens) (values acc other-tokens)]
+      [`(,val . ,other-tokens)
+       (let-values [((v _) (parse-literal (list val)))]
+         (parse-comma-vals other-tokens (append acc (list v))))])))
 
 (define parse-unary
   (λ (tokens)

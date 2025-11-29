@@ -21,6 +21,8 @@
 (define-struct Binary (op lhs rhs) #:transparent)
 (define-struct WhileLoop (cnd body) #:transparent)
 (define-struct IfStmt (cnd conseq alt) #:transparent)
+(define-struct Vector (vals) #:transparent)
+(define-struct Indexing (vec index) #:transparent)
 
 (provide (struct-out Keyword) (struct-out Identifier) (struct-out Symbol)
 
@@ -28,4 +30,4 @@
          (struct-out Semicolon) (struct-out Let) (struct-out Void)
          (struct-out SetBang) (struct-out Unary) (struct-out Binary)
          (struct-out WhileLoop) (struct-out If) (struct-out Else)
-         (struct-out IfStmt))
+         (struct-out IfStmt) (struct-out Vector) (struct-out Indexing))
