@@ -13,6 +13,10 @@
        (match/values
         (parse-comma-vals other-tokens null)
         [(exprs post-tokens) (values (Indexing (Identifier ident) (car exprs)) post-tokens)])]
+      [`(,(Identifier ident) ,(Symbol '|(|) . ,other-tokens)
+       (let-values
+           [((pairs post-tokens) (parse-comma-vals other-tokens null))]
+         (values (FunctionCall (Identifier ident) pairs) post-tokens))]
       [`(,token . ,other-tokens) #:when (Identifier? token) (values token other-tokens)]
       [`(,(Symbol '|(|) . ,other-tokens)
        (match/values
@@ -33,6 +37,13 @@
       [`(,val . ,other-tokens)
        (let-values [((v _) (parse-literal (list val)))]
          (parse-comma-vals other-tokens (append acc (list v))))])))
+
+(define parse-args
+  (λ (tokens acc)
+    (match tokens
+      [`(,(Symbol '|,|) . ,other-tokens) (parse-args other-tokens acc)]
+      [`(,(or (Symbol '|]|) (Symbol '|)|)) . ,other-tokens) (values acc other-tokens)]
+      [`(,(Identifier val) ,(Symbol ':) ,(Type t) . ,other-tokens) (parse-args other-tokens (append acc (list (cons val t))))])))
 
 (define parse-unary
   (λ (tokens)
@@ -101,6 +112,13 @@
     (match tokens
       [(? null?) (error "tried to consume an empty program")]
       [`(,(Identifier ident) . ,other-tokens) (values ident other-tokens)]
+      [_ (error "consumed wrong type")])))
+
+(define parse-type
+  (λ (tokens)
+    (match tokens
+      [(? null? ) (error "tried to consume an empty program")]
+      [`(,(Type t) . ,other-tokens) (values t other-tokens)]
       [_ (error "consumed wrong type")])))
 
 (define parse-assignment
@@ -181,11 +199,23 @@
            (parse-stmt rparen-tokens)
            [(stmt stmt-tokens) (values (WhileLoop cond-expr stmt) stmt-tokens)]))]))))
 
+(define parse-function
+  (λ (tokens)
+    (let*-values [((tokens) (consume-keyword tokens 'Function))
+                  ((ident tokens) (parse-identifier tokens))
+                  ((tokens) (consume-symbol tokens '|(|))
+                  ((arg-pairs tokens) (parse-args tokens null))
+                  ((tokens) (consume-symbol tokens '->))
+                  ((t tokens) (parse-type tokens))
+                  ((body tokens) (parse-stmt tokens))]
+      (values (Function ident arg-pairs t body) tokens))))
+
 (define parse-top
   (λ (tokens)
     (match tokens
       [`(,(Keyword 'Let) . ,_) (parse-binding tokens)]
       [`(,(Keyword 'While) . ,_) (parse-while tokens)]
+      [`(,(Keyword 'Function) . ,_) (parse-function tokens)]
       [_ (parse-stmt tokens)])))
 
 (define parse-body-tk

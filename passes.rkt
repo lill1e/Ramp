@@ -27,7 +27,8 @@
       [(or (Identifier _)
            (Number _)
            (Boolean _)
-           (Void)) expr]
+           (Void)
+           (Type _)) expr]
       [(Begin stmts final)
        (match (Begin (map coalesce-cond stmts) (coalesce-cond final))
          [(Begin stmts final)
@@ -45,7 +46,9 @@
       [(If cnd body) (If (coalesce-cond cnd) (coalesce-cond body))]
       [(Else body) (Else (coalesce-cond body))]
       [(Vector vals) (Vector (map coalesce-cond vals))]
-      [(Indexing vec index) (Indexing (coalesce-cond vec) (coalesce-cond index))])))
+      [(Indexing vec index) (Indexing (coalesce-cond vec) (coalesce-cond index))]
+      [(Function name args rtype body) (Function name args rtype (coalesce-cond body))]
+      [(FunctionCall fn args) (FunctionCall (coalesce-cond fn) (map coalesce-cond args))])))
 
 (define conform
   (λ (expr)
@@ -62,6 +65,12 @@
       [(WhileLoop cnd body) (WhileLoop (conform cnd) (conform body))]
       [(IfStmt cnd conseq alt) (IfStmt (conform cnd) (conform conseq) (conform alt))]
       [(Vector vals) (Prim 'vector (map conform vals))]
-      [(Indexing vec index) (Prim 'vector-ref (list (conform vec) (conform index)))])))
+      [(Indexing vec index) (Prim 'vector-ref (list (conform vec) (conform index)))]
+      [(Type t)
+       (Type (match t
+               ['Number 'Integer]
+               [_ t]))]
+      [(Function name args rtype body) (Def name (map (λ (p) `[,(car p) : ,(cdr p)]) args) rtype null (conform body))]
+      [(FunctionCall fn args) (Apply (conform fn) (map conform args))])))
 
 (provide coalesce-cond conform)

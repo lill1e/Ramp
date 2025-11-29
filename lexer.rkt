@@ -22,7 +22,9 @@
    '|}|
    '|[|
    '|]|
-   '|,|))
+   '|,|
+   '->
+   ':))
 
 (define char-ops (map (λ (sym-op) (string-ref (symbol->string sym-op) 0)) ops))
 
@@ -57,8 +59,12 @@
            [(or 'true 'false) (Boolean (eqv? v 'true))]
            ['let (Keyword 'Let)]
            ['while (Keyword 'While)]
+           ['function (Keyword 'Function)]
            ['if (Keyword 'If)]
            ['else (Keyword 'Else)]
+           ['Number (Type 'Number)]
+           ['Boolean (Type 'Boolean)]
+           ['Void (Type 'Void)]
            [_ (Identifier v)])]
       [_ (error "invalid char found")])))
 
