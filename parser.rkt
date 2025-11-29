@@ -140,8 +140,7 @@
     (match exprs
       [(? null?) (Void)]
       [(list expr) expr]
-      [_ (Begin (drop-right exprs 1) (car (take-right exprs 1)))])
-    ))
+      [_ (Begin (drop-right exprs 1) (car (take-right exprs 1)))])))
 
 (define parse-block
   (λ (tokens exprs)
