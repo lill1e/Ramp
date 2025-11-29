@@ -43,6 +43,8 @@
       [(Binary op lhs rhs) (Binary op (coalesce-cond lhs) (coalesce-cond rhs))]
       [(WhileLoop cnd body) (WhileLoop (coalesce-cond cnd) (coalesce-cond body))]
       [(If cnd body) (If (coalesce-cond cnd) (coalesce-cond body))]
-      [(Else body) (Else (coalesce-cond body))])))
+      [(Else body) (Else (coalesce-cond body))]
+      [(Vector vals) (Vector (map coalesce-cond vals))]
+      [(Indexing vec index) (Indexing (coalesce-cond vec) (coalesce-cond index))])))
 
 (provide coalesce-cond)
