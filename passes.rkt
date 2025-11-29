@@ -47,4 +47,21 @@
       [(Vector vals) (Vector (map coalesce-cond vals))]
       [(Indexing vec index) (Indexing (coalesce-cond vec) (coalesce-cond index))])))
 
-(provide coalesce-cond)
+(define conform
+  (λ (expr)
+    (match expr
+      [(Identifier ident) (Var ident)]
+      [(Number n) (Int n)]
+      [(Boolean b) (Bool b)]
+      [(Void) (Void)]
+      [(Begin stmts final) (Begin (map conform stmts) (conform final)) ]
+      [(Let sym rhs body) (Let sym (conform rhs) (conform body))]
+      [(SetBang sym rhs) (SetBang sym (conform rhs))]
+      [(Unary op child) (Prim (Symbol-sym op) (list (conform child)))]
+      [(Binary op lhs rhs) (Prim (Symbol-sym op) (list (conform lhs) (conform rhs)))]
+      [(WhileLoop cnd body) (WhileLoop (conform cnd) (conform body))]
+      [(IfStmt cnd conseq alt) (IfStmt (conform cnd) (conform conseq) (conform alt))]
+      [(Vector vals) (Prim 'vector (map conform vals))]
+      [(Indexing vec index) (Prim 'vector-ref (list (conform vec) (conform index)))])))
+
+(provide coalesce-cond conform)

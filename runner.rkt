@@ -10,7 +10,8 @@
 (require "passes.rkt")
 
 (define passes
-  (list (cons "coalesce conditions" coalesce-cond)))
+  (list (cons "coalesce conditions" coalesce-cond)
+        (cons "struct conforming" conform)))
 
 (define passify
   (λ (p current-passes)
