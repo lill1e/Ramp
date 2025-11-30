@@ -27,7 +27,11 @@
       [`(,(Symbol '|[|) . ,other-tokens)
        (match/values
         (parse-comma-vals other-tokens null)
-        [(exprs post-tokens) (values (Vector exprs) post-tokens)])])))
+        [(exprs post-tokens) (values (Vector exprs) post-tokens)])]
+      [`(,(Keyword 'Array) ,(Symbol '|(|) . ,lp-tokens)
+       (match/values
+        (parse-comma-vals lp-tokens null)
+        [((list len initial) toks) (values (Array len initial) toks)])])))
 
 (define parse-comma-vals
   (λ (tokens acc)

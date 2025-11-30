@@ -48,7 +48,8 @@
       [(Vector vals) (Vector (map coalesce-cond vals))]
       [(Indexing vec index) (Indexing (coalesce-cond vec) (coalesce-cond index))]
       [(Function name args rtype body) (Function name args rtype (coalesce-cond body))]
-      [(FunctionCall fn args) (FunctionCall (coalesce-cond fn) (map coalesce-cond args))])))
+      [(FunctionCall fn args) (FunctionCall (coalesce-cond fn) (map coalesce-cond args))]
+      [(Array len initial) (Array (coalesce-cond len) (coalesce-cond initial))])))
 
 (define conform
   (λ (expr)
@@ -71,6 +72,7 @@
                ['Number 'Integer]
                [_ t]))]
       [(Function name args rtype body) (Def name (map (λ (p) `[,(car p) : ,(cdr p)]) args) rtype null (conform body))]
-      [(FunctionCall fn args) (Apply (conform fn) (map conform args))])))
+      [(FunctionCall fn args) (Apply (conform fn) (map conform args))]
+      [(Array len initial) (Array (conform len) (conform initial))])))
 
 (provide coalesce-cond conform)

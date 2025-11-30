@@ -62,6 +62,7 @@
            ['function (Keyword 'Function)]
            ['if (Keyword 'If)]
            ['else (Keyword 'Else)]
+           ['Array (Keyword 'Array)]
            ['Number (Type 'Number)]
            ['Boolean (Type 'Boolean)]
            ['Void (Type 'Void)]
