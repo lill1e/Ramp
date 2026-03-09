@@ -105,6 +105,7 @@
         [(#\space _) (file->symbols p (extend-acc acc alt-acc) null)]
         [(#\newline _) (file->symbols p acc alt-acc)]
         [((? char-numeric?) (? number?)) (file->symbols p acc (+ (* alt-acc 10) (char->number r)))]
+        [((? char-numeric?) (? word?)) (file->symbols p acc (append alt-acc (list r)))]
         [((? char-numeric?) _) (file->symbols p (extend-acc acc alt-acc) (char->number r))]
         [((? word-char?) (? word?)) (file->symbols p acc (append alt-acc (list r)))]
         [((? word-char?) _) (file->symbols p (extend-acc acc alt-acc) (list r))]
