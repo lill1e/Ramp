@@ -17,7 +17,7 @@ StmtAlt    ::= while Expression Statement
 Block      ::= { Statement* }
 Statement  ::= Stmt ; | Block
 TopLevel   ::= Statement
-			 | fn Identifier ((Identifier: Type)*) Statement
+			 | function Identifier ((Identifier: Type)*) -> Type Statement
 			 | while Expression Statement
 			 | Let Identifier = Statement
 Program    ::= Statement*
