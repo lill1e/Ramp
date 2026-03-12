@@ -9,9 +9,7 @@
 (require "parser.rkt")
 (require "passes.rkt")
 
-(define passes
-  (list (cons "coalesce conditions" coalesce-cond)
-        (cons "struct conforming" conform)))
+(define passes null)
 
 (define passify
   (λ (p current-passes)
