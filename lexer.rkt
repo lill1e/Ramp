@@ -30,21 +30,15 @@
 (define value->lexeme
   (λ (s)
     (match s
-      [n #:when (number? n) (Number n)]
-      [b #:when (boolean? b) (Boolean (if b #t #f))]
-      ['\; (Semicolon)]
       [(? op?) (Symbol s)]
       [v #:when (symbol? v)
          (match v
-           [(or 'true 'false) (Boolean (eqv? v 'true))]
            ['let (Keyword 'Let)]
            ['while (Keyword 'While)]
            ['function (Keyword 'Function)]
            ['if (Keyword 'If)]
            ['else (Keyword 'Else)]
            ['Array (Keyword 'Array)]
-           ['Number (Type 'Number)]
-           ['Boolean (Type 'Boolean)]
            ['Void (Type 'Void)]
            [_ (Identifier v)])]
       [_ (error "invalid char found")])))
@@ -68,8 +62,6 @@
 (define acc->sym
   (λ (acc)
     (match acc
-      ['|;| acc]
-      [(? number?) acc]
       [(or (? list-op?) (? word?)) (string->symbol (apply string acc))])))
 
 (define extend-acc
@@ -81,12 +73,8 @@
     (let [(r (read-char p))]
       (match* (r alt-acc)
         [(_ _) #:when (eof-object? r) (extend-acc acc alt-acc)]
-        [(#\; _) (file->symbols p (extend-acc (extend-acc acc alt-acc) '|;|) null)]
         [(#\space _) (file->symbols p (extend-acc acc alt-acc) null)]
         [(#\newline _) (file->symbols p acc alt-acc)]
-        [((? char-numeric?) (? number?)) (file->symbols p acc (+ (* alt-acc 10) (char->number r)))]
-        [((? char-numeric?) (? word?)) (file->symbols p acc (append alt-acc (list r)))]
-        [((? char-numeric?) _) (file->symbols p (extend-acc acc alt-acc) (char->number r))]
         [((? word-char?) (? word?)) (file->symbols p acc (append alt-acc (list r)))]
         [((? word-char?) _) (file->symbols p (extend-acc acc alt-acc) (list r))]
         [((? char?) _) #:when (chars-op? (append (list-if-needed alt-acc) (list r))) (file->symbols p acc (append alt-acc (list r)))]
