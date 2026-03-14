@@ -18,6 +18,11 @@
   (λ (c)
     (not (member c char-ops))))
 
+(define word-string?
+  (λ (loc)
+    (and (> (length loc) 1)
+         (eqv? (car loc) #\"))))
+
 (define chars?
   (λ (loc)
     (= (length (filter char? loc)) (length loc))))
@@ -27,16 +32,22 @@
     (if (null? op) #f
         (if (chars? op) (memv (string->symbol (list->string op)) ops) #f))))
 
+(define op-char?
+  (λ (c) (memv c char-ops)))
+
+(define op-chars?
+  (λ (chars)
+    (andmap op-char? chars)))
+
 (define value->lexeme
   (λ (s)
     (match s
+      [(? string?) (String (substring s 1 (sub1 (string-length s))))]
+      ['|\n| (Newline)]
       [(? op?) (Symbol s)]
       [v #:when (symbol? v)
          (match v [_ (Identifier v)])]
       [_ (error "invalid char found")])))
-
-(define char->number
-  (λ (c) (- (char->integer c) (char->integer #\0))))
 
 (define word?
   (λ (loc)
@@ -54,11 +65,19 @@
 (define acc->sym
   (λ (acc)
     (match acc
+      ['|\n| acc]
       [(or (? list-op?) (? word?)) (string->symbol (apply string acc))])))
 
 (define extend-acc
   (λ (acc item)
-    (append (list-if-needed acc) (if (null? item) null (list (acc->sym item))))))
+    (append (list-if-needed acc)
+            (if (null? item)
+                null
+                (list
+                 (if
+                  (and (list? item)
+                       (eq? #\" (car item)))
+                  (list->string item) (acc->sym item)))))))
 
 (define file->symbols
   (λ (p acc alt-acc)
@@ -66,11 +85,15 @@
       (match* (r alt-acc)
         [(_ _) #:when (eof-object? r) (extend-acc acc alt-acc)]
         [(#\space _) (file->symbols p (extend-acc acc alt-acc) null)]
-        [(#\newline _) (file->symbols p acc alt-acc)]
+        [(#\newline _) (file->symbols p (extend-acc (extend-acc acc alt-acc) '|\n|) null)]
+        [(#\" (? word-string?)) (file->symbols p (extend-acc acc (append alt-acc (list r))) null)]
+        [(#\" _) (file->symbols p (extend-acc acc alt-acc) (list r))]
         [((? word-char?) (? word?)) (file->symbols p acc (append alt-acc (list r)))]
         [((? word-char?) _) (file->symbols p (extend-acc acc alt-acc) (list r))]
+        [((? char?) (? word-string?)) (file->symbols p acc (append alt-acc r))]
         [((? char?) _) #:when (chars-op? (append (list-if-needed alt-acc) (list r))) (file->symbols p acc (append alt-acc (list r)))]
         [((? char?) (? op?)) (file->symbols p acc (append alt-acc (list r)))]
+        [((? char?) (? op-chars?)) (file->symbols p acc (append alt-acc (list r)))]
         [((? char?) _) (file->symbols p (extend-acc acc alt-acc) (list r))]))))
 
 (define lex

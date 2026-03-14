@@ -9,7 +9,7 @@
       [(? null?) (error "reached end of tokens without a match")]
       [`(,(Symbol s) . ,other-tokens) #:when (memv s syms)
                                       (match/values
-                                       (next other-tokens)
+                                       (next other-tokens null)
                                        [(rhs post-tokens) (make-binary post-tokens (Binary (car tokens) lhs rhs) next syms)])]
       [_ (values lhs tokens)])))
 
