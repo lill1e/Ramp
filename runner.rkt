@@ -9,7 +9,7 @@
 (require "parser.rkt")
 (require "passes.rkt")
 
-(define passes null)
+(define passes (list (cons "Operator Simplification" ops->structs)))
 
 (define passify
   (λ (p current-passes)
