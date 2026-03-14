@@ -32,15 +32,7 @@
     (match s
       [(? op?) (Symbol s)]
       [v #:when (symbol? v)
-         (match v
-           ['let (Keyword 'Let)]
-           ['while (Keyword 'While)]
-           ['function (Keyword 'Function)]
-           ['if (Keyword 'If)]
-           ['else (Keyword 'Else)]
-           ['Array (Keyword 'Array)]
-           ['Void (Type 'Void)]
-           [_ (Identifier v)])]
+         (match v [_ (Identifier v)])]
       [_ (error "invalid char found")])))
 
 (define char->number
